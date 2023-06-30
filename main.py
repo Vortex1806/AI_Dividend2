@@ -151,7 +151,7 @@ additional_data = {
 for key, value in additional_data.items():
     col1.write(f"{key}: {value}")
 
-st.title("Lucidate Research Demo. Powered by LangChain 🦜🔗 ")
+st.title("Powered by LangChain 🦜🔗 ")
 col2.title("Opportunities for investors")
 print(f"**********\nstocks[selected_stock]\n*************\n{stocks[selected_stock]}\n\n**********\n")
 col2.write(get_recommendation(stocks[selected_stock], "What are this firm's key products and services?"))
