@@ -44,7 +44,7 @@ stocks = {
     "Netflix - 'NFLX'": {"name": "NETFLIX INC", "symbol": "NFLX", "cik": "0001065280"},
     "Microsoft - 'MSFT'": {"name": "MICROSOFT CORP", "symbol": "MSFT", "cik": "0000789019"},
     "Tesla - 'TSLA'": {"name": "TESLA INC", "symbol": "TSLA", "cik": "0001318605"},
-    "Home Depot - 'DISLA'": {"name": "The Home Depot", "symbol": "HDI", "cik": "0000354950 "}
+    "Home Depot - 'HDI'": {"name": "The Home Depot", "symbol": "HDI", "cik": "0000354950 "}
 }
 def get_recommendation(stock_cik, question):
 
