@@ -130,7 +130,10 @@ pe_ratio = '{0:.2f}'.format(summary_detail["trailingPE"])
 price_to_sales = summary_detail["fiftyTwoWeekLow"]
 target_price = summary_detail["fiftyTwoWeekHigh"]
 market_cap = summary_detail["marketCap"]
-ebitda = ticker.info["ebitda"]
+if "ebitda" in ticker.info:
+    ebitda = ticker.info["ebitda"]
+else:
+    ebitda = 0
 tar = ticker.info["targetHighPrice"]
 rec = ticker.info["recommendationKey"].upper()
 
