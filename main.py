@@ -46,7 +46,7 @@ stocks = {
     "Tesla - 'TSLA'": {"name": "TESLA INC", "symbol": "TSLA", "cik": "0001318605"},
     "Home Depot - 'HDI.DE'": {"name": "The Home Depot", "symbol": "HDI.DE", "cik": "0000354950"},
     "MC Donalds - 'MCD'": {"name": "The Home Depot", "symbol": "MCD", "cik": "0000063908"},
-    
+
 }
 def get_recommendation(stock_cik, question):
 
@@ -123,8 +123,50 @@ df_financials.set_index('date', inplace=True)
 col1.write(df_financials)
 
 summary_detail = ticker_yq.summary_detail[stocks[selected_stock]["symbol"]]
-
 obj = yf.Ticker(stocks[selected_stock]["symbol"])
+
+fcf = format_large_number(obj.info['freeCashflow'])
+cash_equivalents = obj.get_balance_sheet().loc['CashAndCashEquivalents'].iloc[0]
+total_debt = obj.info['totalDebt']
+total_assets = obj.get_balance_sheet().loc['TotalAssets'].iloc[0]
+total_liabilities = obj.get_balance_sheet().loc['TotalLiabilitiesNetMinorityInterest'].iloc[0]
+
+
+cashflow_obtained = obj.cashflow.iloc[0]
+historical_free_cash_flows=[]
+for i in range(cashflow_obtained.size):
+    historical_free_cash_flows.append(obj.cashflow.iloc[0][i])
+discount_rate = 0.085
+perpetual_growth_rate = 0.025
+growth_rates = []
+for i in range(1, len(historical_free_cash_flows)):
+    growth_rate = (historical_free_cash_flows[i] - historical_free_cash_flows[i - 1]) / historical_free_cash_flows[i - 1]
+    growth_rates.append(growth_rate)
+average_growth_rate = sum(growth_rates) / len(growth_rates)
+
+future_free_cash_flows = [historical_free_cash_flows[-1] * (1 + average_growth_rate / 100)]
+for i in range(1, 9):
+    future_cash_flow = future_free_cash_flows[i - 1] * (1 + average_growth_rate / 100)
+    future_free_cash_flows.append(future_cash_flow)
+
+
+terminal_value = future_free_cash_flows[-1] * (1 + perpetual_growth_rate) / (discount_rate - perpetual_growth_rate)
+pv_terminal_value = terminal_value / (1 + discount_rate) ** len(future_free_cash_flows)
+
+discounted_cash_flows = [fcf / (1 + discount_rate) ** (i + 1) for i, fcf in enumerate(future_free_cash_flows)]
+
+total_pv_free_cash_flows = sum(discounted_cash_flows) + pv_terminal_value
+equity_value=total_pv_free_cash_flows+cash_equivalents-total_debt
+shares_outstanding = obj.info['sharesOutstanding']
+dcf_price_per_share = equity_value / shares_outstanding
+
+shares_outstanding = format_large_number(obj.info['sharesOutstanding'])
+
+
+
+
+
+
 
 pe_ratio = '{0:.2f}'.format(summary_detail["trailingPE"])
 price_to_sales = summary_detail["fiftyTwoWeekLow"]
@@ -140,7 +182,10 @@ rec = ticker.info["recommendationKey"].upper()
 # Format large numbers
 market_cap = format_large_number(market_cap)
 ebitda = format_large_number(ebitda)
-
+cash_equivalents=format_large_number(cash_equivalents)
+total_debt=format_large_number(total_debt)
+equity_value=format_large_number(equity_value)
+dcf_price_per_share=round(dcf_price_per_share,2)
 # Create a dictionary for additional stock data
 additional_data = {
     "P/E Ratio": pe_ratio,
@@ -149,7 +194,13 @@ additional_data = {
     "Market Capitalisation": market_cap,
     "EBITDA": ebitda,
     "Price Target": tar,
-    "Recommendation": rec
+    "Recommendation": rec,
+    "Free Cash Flow":fcf,
+    "Cash & Cash Equivalents":cash_equivalents,
+    "Total Debt":total_debt,
+    "Equity Value":equity_value,
+    "Shares Outstanding":shares_outstanding,
+    "DCF Price Per Share":dcf_price_per_share
 }
 
 # Display additional stock data in the first column
