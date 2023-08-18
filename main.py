@@ -69,10 +69,14 @@ def get_recommendation(stock_cik, question):
     docsearch = FAISS.from_documents(docs, embeddings)
 
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=docsearch.as_retriever())
-    query = question
-    analysis = qa.run(query)
+    query1 = question[0]
+    query2 = question[1]
+    query3 = question[2]
+    answerarray[0]=qa.run(query1).translate(str.maketrans("", "", "_*"))
+    answerarray[1]=qa.run(query2).translate(str.maketrans("", "", "_*"))
+    answerarray[2]=qa.run(query3).translate(str.maketrans("", "", "_*"))
 
-    return analysis.translate(str.maketrans("", "", "_*"))
+    return answerarray
 
 
 st.set_page_config(page_title="Stock Information", layout="wide", initial_sidebar_state="collapsed", page_icon="Color Logo.png")
@@ -210,8 +214,10 @@ for key, value in additional_data.items():
 st.title("Powered by AI ")
 col2.title("Opportunities for investors")
 print(f"**********\nstocks[selected_stock]\n*************\n{stocks[selected_stock]}\n\n**********\n")
-col2.write(get_recommendation(stocks[selected_stock], "What are this firm's key products and services?"))
-col2.write(get_recommendation(stocks[selected_stock], "What are the new products and growth opportunities for this firm. What are its unique strengths?"))
-col2.write(get_recommendation(stocks[selected_stock], "Who are this firms key competitors? What are the principal threats?"))
+questionsarray=["What are this firm's key products and services?","What are the new products and growth opportunities for this firm. What are its unique strengths?", "Who are this firms key competitors? What are the principal threats?"]
+answerarray=get_recommendation(stocks[selected_stock],questionsarray)
+col2.write(answerarray[0])
+col2.write(answerarray[1])
+col2.write(answerarray[2])
 
 
